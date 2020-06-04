@@ -202,6 +202,9 @@ class Sidebar extends React.PureComponent<Props, State> {
         <div style={{ flexGrow: 1 }} />
         <PrimeDownload />
         <SidebarItems className="no-shrink">
+          {this.renderLink("itch://donnerdaemon", "cog", [
+            "sidebar.donnerdaemon",
+          ])}
           {this.renderLink("itch://downloads", "download", [
             "sidebar.downloads",
           ])}

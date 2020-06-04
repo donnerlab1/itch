@@ -4,6 +4,7 @@ export interface WindowInitialParams {
 }
 
 const whitelist: { [key: string]: WindowInitialParams } = {
+  "itch://donnerdaemon": {},
   "itch://downloads": {},
   "itch://preferences": {},
   "itch://applog": {},

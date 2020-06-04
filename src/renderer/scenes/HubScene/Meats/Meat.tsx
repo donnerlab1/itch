@@ -8,13 +8,11 @@ import { hookWithProps } from "renderer/hocs/hook";
 import { withTab } from "renderer/hocs/withTab";
 import { MeatProps } from "renderer/scenes/HubScene/Meats/types";
 import styled from "renderer/styles";
-import { T, _ } from "renderer/t";
-import FiltersContainer from "renderer/basics/FiltersContainer";
+import { _, T } from "renderer/t";
 import BrowserBar from "renderer/pages/BrowserPage/BrowserBar";
 import Page from "renderer/pages/common/Page";
 import { actions } from "common/actions";
 import { modals } from "common/modals";
-import { formatError } from "common/format/errors";
 
 const CrashyPage = Loadable({
   loader: () => import("renderer/pages/CrashyPage"),
@@ -78,6 +76,10 @@ const AppLogPage = Loadable({
 });
 const DashboardPage = Loadable({
   loader: () => import("renderer/pages/DashboardPage"),
+  loading: () => null,
+});
+const DonnerDaemonPage = Loadable({
+  loader: () => import("renderer/pages/DonnerDaemonPage"),
   loading: () => null,
 });
 const DownloadsPage = Loadable({
@@ -285,6 +287,8 @@ class Meat extends React.PureComponent<Props, State> {
         }
       case "dashboard":
         return DashboardPage;
+      case "donnerdaemon":
+        return DonnerDaemonPage;
       case "downloads":
         return DownloadsPage;
       case "preferences":

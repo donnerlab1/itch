@@ -204,6 +204,16 @@ export function userMenu(store: Store): MenuTemplate {
       type: "separator",
     },
     {
+      icon: "cog",
+      localizedLabel: ["sidebar.donnerdaemon"],
+      id: "user-menu-donner-daemon",
+      action: actions.navigate({
+        wind: "root",
+        url: "itch://donnerdaemon",
+      }),
+      accelerator: "CmdOrCtrl+D",
+    },
+    {
       icon: "download",
       localizedLabel: ["sidebar.downloads"],
       id: "user-menu-downloads",
