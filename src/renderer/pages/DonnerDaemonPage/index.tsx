@@ -7,6 +7,7 @@ import styled, * as styles from "renderer/styles";
 import {
   GetBalanceRequest,
   LncliRequest,
+  GetBalanceResponse,
 } from "../../../static/generated/daemon/daemon_pb";
 import { DaemonServiceClient } from "../../../static/generated/daemon/daemon_grpc_pb";
 import { credentials } from "@grpc/grpc-js";
@@ -23,6 +24,11 @@ const DonnerDaemonContentDiv = styled.div`
 
   color: ${props => props.theme.baseText};
 
+  table,
+  th,
+  td {
+    border: 1px solid white;
+  }
   .heading,
   h2 {
     font-size: 18px;
@@ -121,12 +127,12 @@ const DonnerDaemonContentDiv = styled.div`
 `;
 
 type DaemonState = {
-  balance: number;
+  balance: GetBalanceResponse;
 };
 
 const DonnerDaemonPage = (props: Props) => {
   const [daemonState, setDaemonState] = useState<DaemonState>({
-    balance: 0,
+    balance: new GetBalanceResponse(),
   });
 
   // const refTerminal = useRef(null)
@@ -140,7 +146,6 @@ const DonnerDaemonPage = (props: Props) => {
   const balanceRequest = () => {
     console.log("making missing balanace request");
     client.getBalance(new GetBalanceRequest(), (e, response) => {
-      console.log(response);
       if (e) {
         console.log(e);
         return;
@@ -148,9 +153,8 @@ const DonnerDaemonPage = (props: Props) => {
       console.log(response);
       setDaemonState(prevState => ({
         ...prevState,
-        balance: response.getBufferBalance() + response.getDaemonBalance(),
+        balance: response,
       }));
-      console.log(response);
       return;
     });
   };
@@ -187,7 +191,10 @@ const DonnerDaemonPage = (props: Props) => {
       },
     },
   };
-
+  const refreshBalance = (e: any) => {
+    e.preventDefault();
+    balanceRequest();
+  };
   useEffect(() => {
     console.log("mounted");
     balanceRequest();
@@ -201,9 +208,36 @@ const DonnerDaemonPage = (props: Props) => {
       <DonnerDaemonContentDiv>
         <h1>Donner Daemon</h1>
         <br />
+        <button onClick={refreshBalance}>Refresh</button>
         <h2>Balance</h2>
+        <table>
+          <tr>
+            <th>Type</th>
+            <th>Sats</th>
+          </tr>
+          <tr>
+            <th>Buffer</th>
+            <th>{daemonState.balance.getBufferBalance()}</th>
+          </tr>
+          <tr>
+            <th>Node</th>
+            <th>{daemonState.balance.getDaemonBalance()}</th>
+          </tr>
+          <tr>
+            <th>ChannelCost</th>
+            <th>{daemonState.balance.getChannelMissingBalance()}</th>
+          </tr>
+          <tr>
+            <th>Total</th>
+            <th>
+              {daemonState.balance.getBufferBalance() +
+                daemonState.balance.getDaemonBalance() -
+                daemonState.balance.getChannelMissingBalance()}
+            </th>
+          </tr>
+        </table>
+
         <br />
-        {daemonState.balance} sats
         <h2>Debug</h2>
         <br />
         <Terminal
