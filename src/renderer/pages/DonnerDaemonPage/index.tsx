@@ -123,6 +123,7 @@ const DonnerDaemonContentDiv = styled.div`
 type DaemonState = {
   cmd: string;
   balance: number;
+  cmdOutput: string;
 };
 
 const DonnerDaemonPage = (props: Props) => {
@@ -137,14 +138,17 @@ const DonnerDaemonPage = (props: Props) => {
   );
   const balanceRequest = () => {
     console.log("making missing balanace request");
-    client.getConnection(new GetConnectionRequest(), (e, response) => {
+    client.getBalance(new GetBalanceRequest(), (e, response) => {
       console.log(response);
       if (e) {
         console.log(e);
         return;
       }
       console.log(response);
-      //setDaemonState({ cmd: "", balance: response.getChannelMissingBalance() });
+      setDaemonState({
+        cmd: "",
+        balance: response.getBufferBalance() + response.getDaemonBalance(),
+      });
       console.log(response);
       return;
     });
@@ -160,6 +164,10 @@ const DonnerDaemonPage = (props: Props) => {
         return;
       }
       console.log(response);
+      setDaemonState(prevState => ({
+        ...prevState,
+        cmdOutput: response.getTextResponse(),
+      }));
     });
   };
 
@@ -185,14 +193,22 @@ const DonnerDaemonPage = (props: Props) => {
   return (
     <DonnerDaemonDiv>
       <DonnerDaemonContentDiv>
-        <h1>Hello</h1>
+        <h1>Donner Daemon</h1>
+        <br />
+        <h2>Balance</h2>
+        <br />
+        {daemonState.balance} sats
+        <h2>Debug</h2>
+        <br />
         <input
           type="text"
           onChange={handleInputChange}
           value={daemonState.cmd}
         />
-        <button onClick={handleSubmit}>Submit</button>
-        {daemonState.balance}
+        <br />
+        <button onClick={handleSubmit}>Lncli</button>
+        <br />
+        <div>{daemonState.cmdOutput}</div>
       </DonnerDaemonContentDiv>
     </DonnerDaemonDiv>
   );
