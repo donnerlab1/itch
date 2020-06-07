@@ -167,7 +167,7 @@ const DonnerDaemonPage = (props: Props) => {
     return client.lncli(req, (e, response) => {
       if (e) {
         console.log(e);
-        terminal.pushToStdout("error");
+        terminal.pushToStdout(e);
         return;
       }
       console.log(response);
@@ -187,7 +187,8 @@ const DonnerDaemonPage = (props: Props) => {
       description: "Lncli command",
       usage: "lncli <string>",
       fn: function() {
-        return lncliRequest(`${Array.from(arguments).join(" ")}`);
+        lncliRequest(`${Array.from(arguments).join(" ")}`);
+        return "Running, please wait...";
       },
     },
   };
@@ -243,8 +244,10 @@ const DonnerDaemonPage = (props: Props) => {
         <Terminal
           commands={commands}
           ref={refTerminal}
-          welcomeMessage={"Welcome to the Donner Daemon terminal!"}
+          welcomeMessage={["Welcome to the Donner Daemon terminal!"]}
           promptLabel={"me@daemon:~$"}
+          style={{ userSelect: "text" }}
+          messageStyle={{ whiteSpace: "pre-wrap" }}
         />
       </DonnerDaemonContentDiv>
     </DonnerDaemonDiv>
