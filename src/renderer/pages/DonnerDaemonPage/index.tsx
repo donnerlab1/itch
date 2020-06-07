@@ -6,11 +6,11 @@ import { MeatProps } from "renderer/scenes/HubScene/Meats/types";
 import styled, * as styles from "renderer/styles";
 import {
   GetBalanceRequest,
-  GetConnectionRequest,
   LncliRequest,
 } from "../../../static/generated/daemon/daemon_pb";
 import { DaemonServiceClient } from "../../../static/generated/daemon/daemon_grpc_pb";
 import { credentials } from "@grpc/grpc-js";
+import Terminal from "react-console-emulator";
 
 const DonnerDaemonDiv = styled.div`
   ${styles.meat};
@@ -121,21 +121,22 @@ const DonnerDaemonContentDiv = styled.div`
 `;
 
 type DaemonState = {
-  cmd: string;
   balance: number;
-  cmdOutput: string;
 };
 
 const DonnerDaemonPage = (props: Props) => {
   const [daemonState, setDaemonState] = useState<DaemonState>({
-    cmd: "",
     balance: 0,
   });
+
+  // const refTerminal = useRef(null)
+  const refTerminal = React.createRef();
 
   const client = new DaemonServiceClient(
     "localhost:10101",
     credentials.createInsecure()
   );
+
   const balanceRequest = () => {
     console.log("making missing balanace request");
     client.getBalance(new GetBalanceRequest(), (e, response) => {
@@ -145,30 +146,46 @@ const DonnerDaemonPage = (props: Props) => {
         return;
       }
       console.log(response);
-      setDaemonState({
-        cmd: "",
+      setDaemonState(prevState => ({
+        ...prevState,
         balance: response.getBufferBalance() + response.getDaemonBalance(),
-      });
+      }));
       console.log(response);
       return;
     });
   };
 
-  const lncli = arg => {
-    console.log("making lncli request " + arg);
+  const lncliRequest = (cmd: string) => {
+    console.log("making lncli request " + cmd);
     const req = new LncliRequest();
-    req.setCommand(arg);
-    client.lncli(req, (e, response) => {
+    req.setCommand(cmd);
+    const terminal: any = refTerminal.current;
+    return client.lncli(req, (e, response) => {
       if (e) {
         console.log(e);
+        terminal.pushToStdout("error");
         return;
       }
       console.log(response);
-      setDaemonState(prevState => ({
-        ...prevState,
-        cmdOutput: response.getTextResponse(),
-      }));
+      terminal.pushToStdout(response.getTextResponse());
     });
+  };
+
+  const commands = {
+    echo: {
+      description: "Echo a passed string.",
+      usage: "echo <string>",
+      fn: function() {
+        return `${Array.from(arguments).join(" ")}`;
+      },
+    },
+    lncli: {
+      description: "Lncli command",
+      usage: "lncli <string>",
+      fn: function() {
+        return lncliRequest(`${Array.from(arguments).join(" ")}`);
+      },
+    },
   };
 
   useEffect(() => {
@@ -178,17 +195,6 @@ const DonnerDaemonPage = (props: Props) => {
       console.log("unmounted");
     };
   }, []);
-
-  const handleInputChange = (e: any) => {
-    const target = e.currentTarget;
-    setDaemonState(prevState => ({ ...prevState, cmd: target.value }));
-  };
-
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    lncli(daemonState.cmd);
-    balanceRequest();
-  };
 
   return (
     <DonnerDaemonDiv>
@@ -200,15 +206,12 @@ const DonnerDaemonPage = (props: Props) => {
         {daemonState.balance} sats
         <h2>Debug</h2>
         <br />
-        <input
-          type="text"
-          onChange={handleInputChange}
-          value={daemonState.cmd}
+        <Terminal
+          commands={commands}
+          ref={refTerminal}
+          welcomeMessage={"Welcome to the Donner Daemon terminal!"}
+          promptLabel={"me@daemon:~$"}
         />
-        <br />
-        <button onClick={handleSubmit}>Lncli</button>
-        <br />
-        <div>{daemonState.cmdOutput}</div>
       </DonnerDaemonContentDiv>
     </DonnerDaemonDiv>
   );

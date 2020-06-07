@@ -54,6 +54,7 @@
     "polished": "^3.4.1",
     "progress-stream": "^2.0.0",
     "react": "^16.8.6",
+    "react-console-emulator": "^4.0.1",
     "react-dom": "^16.8.6",
     "react-fast-compare": "^2.0.4",
     "react-hint": "^3.2.0",
