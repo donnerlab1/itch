@@ -178,7 +178,7 @@ const DonnerDaemonPage = (props: Props) => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    lncli("getinfo");
+    lncli(daemonState.cmd);
     balanceRequest();
   };
 
