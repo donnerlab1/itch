@@ -4,7 +4,11 @@ import { hook } from "renderer/hocs/hook";
 import { withTab } from "renderer/hocs/withTab";
 import { MeatProps } from "renderer/scenes/HubScene/Meats/types";
 import styled, * as styles from "renderer/styles";
-import { GetBalanceRequest } from "../../../static/generated/daemon/daemon_pb";
+import {
+  GetBalanceRequest,
+  GetConnectionRequest,
+  LncliRequest,
+} from "../../../static/generated/daemon/daemon_pb";
 import { DaemonServiceClient } from "../../../static/generated/daemon/daemon_grpc_pb";
 import { credentials } from "@grpc/grpc-js";
 
@@ -133,16 +137,29 @@ const DonnerDaemonPage = (props: Props) => {
   );
   const balanceRequest = () => {
     console.log("making missing balanace request");
-    client.getBalance(new GetBalanceRequest(), (e, response) => {
+    client.getConnection(new GetConnectionRequest(), (e, response) => {
       console.log(response);
       if (e) {
         console.log(e);
         return;
       }
       console.log(response);
-      setDaemonState({ cmd: "", balance: response.getChannelMissingBalance() });
+      //setDaemonState({ cmd: "", balance: response.getChannelMissingBalance() });
       console.log(response);
       return;
+    });
+  };
+
+  const lncli = arg => {
+    console.log("making lncli request " + arg);
+    const req = new LncliRequest();
+    req.setCommand(arg);
+    client.lncli(req, (e, response) => {
+      if (e) {
+        console.log(e);
+        return;
+      }
+      console.log(response);
     });
   };
 
@@ -161,6 +178,7 @@ const DonnerDaemonPage = (props: Props) => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
+    lncli("getinfo");
     balanceRequest();
   };
 
