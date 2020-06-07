@@ -3,9 +3,9 @@ if (process.type !== "browser") {
 }
 
 import {
-  createStore,
   applyMiddleware,
   compose,
+  createStore,
   Middleware,
   MiddlewareAPI,
 } from "redux";
@@ -74,10 +74,15 @@ const enhancers = [
   applyMiddleware(...middleware),
 ];
 
+export const composeEnhancers =
+  (typeof window !== "undefined" &&
+    (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) ||
+  compose;
+
 const store = createStore(
   reducer,
   initialState,
-  compose(...enhancers)
+  composeEnhancers(...enhancers)
 ) as Store;
 
 if (module.hot) {

@@ -4,7 +4,7 @@ import env from "common/env";
 import { elapsed } from "common/format/datetime";
 import { ProxySource, SystemState } from "common/types";
 import { Watcher } from "common/util/watcher";
-import { app, session, protocol, BrowserWindow } from "electron";
+import { app, BrowserWindow, session } from "electron";
 import { mainLogger } from "main/logger";
 import loadPreferences from "main/reactors/preboot/load-preferences";
 import { applyProxySettings } from "main/reactors/proxy";
@@ -143,6 +143,16 @@ export default function(watcher: Watcher) {
         BrowserWindow.addDevToolsExtension(devtoolsPath);
       } catch (e) {
         logger.error(`While adding react devtools path: ${e.stack}`);
+      }
+    }
+
+    let reduxtoolsPath = process.env.ITCH_REDUX_DEVTOOLS_PATH;
+    if (reduxtoolsPath) {
+      try {
+        logger.info(`Adding redux devtools from ${reduxtoolsPath}`);
+        BrowserWindow.addDevToolsExtension(reduxtoolsPath);
+      } catch (e) {
+        logger.error(`While adding redux devtools path: ${e.stack}`);
       }
     }
   });
